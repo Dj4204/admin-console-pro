@@ -58,6 +58,16 @@ const App = () => (
             <Route path="activity" element={<ActivityLogsPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
+          <Route path="/vendor" element={<VendorLayout />}>
+            <Route index element={<Navigate to="/vendor/dashboard" replace />} />
+            <Route path="dashboard" element={<VendorDashboard />} />
+            <Route path="orders" element={<VendorOrders />} />
+            <Route path="products" element={<VendorProducts />} />
+            <Route path="products/add" element={<AddProduct />} />
+            <Route path="earnings" element={<VendorEarnings />} />
+            <Route path="payouts" element={<VendorPayouts />} />
+            <Route path="settings" element={<VendorSettings />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
