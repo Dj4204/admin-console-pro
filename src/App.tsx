@@ -20,6 +20,14 @@ import CouponsPage from "@/pages/admin/CouponsPage";
 import VendorMenuPage from "@/pages/admin/VendorMenuPage";
 import AdminsPage from "@/pages/admin/AdminsPage";
 import ActivityLogsPage from "@/pages/admin/ActivityLogsPage";
+import VendorLayout from "@/components/vendor/VendorLayout";
+import VendorDashboard from "@/pages/vendor/VendorDashboard";
+import VendorOrders from "@/pages/vendor/VendorOrders";
+import VendorProducts from "@/pages/vendor/VendorProducts";
+import AddProduct from "@/pages/vendor/AddProduct";
+import VendorEarnings from "@/pages/vendor/VendorEarnings";
+import VendorPayouts from "@/pages/vendor/VendorPayouts";
+import VendorSettings from "@/pages/vendor/VendorSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
