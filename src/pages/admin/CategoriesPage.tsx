@@ -1,69 +1,60 @@
 import { useState } from "react";
 import { PageHeader, DataTableShell, StatusBadge } from "@/components/AdminComponents";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Image } from "lucide-react";
 
 interface Category {
   id: string;
   name: string;
+  totalItems: number;
   active: boolean;
-  dishCount: number;
 }
 
 const mockCategories: Category[] = [
-  { id: "1", name: "North Indian", active: true, dishCount: 45 },
-  { id: "2", name: "South Indian", active: true, dishCount: 32 },
-  { id: "3", name: "Chinese", active: true, dishCount: 28 },
-  { id: "4", name: "Desserts", active: false, dishCount: 15 },
-  { id: "5", name: "Beverages", active: true, dishCount: 20 },
+  { id: "1", name: "Momos", totalItems: 45, active: true },
+  { id: "2", name: "Biryani", totalItems: 32, active: true },
+  { id: "3", name: "South Indian", totalItems: 28, active: true },
+  { id: "4", name: "Chinese", totalItems: 38, active: true },
+  { id: "5", name: "Desserts", totalItems: 22, active: false },
+  { id: "6", name: "Beverages", totalItems: 18, active: true },
 ];
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState(mockCategories);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryName, setCategoryName] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Category | null>(null);
+  const [form, setForm] = useState({ name: "", active: true });
 
-  const openAdd = () => { setEditingCategory(null); setCategoryName(""); setDialogOpen(true); };
-  const openEdit = (c: Category) => { setEditingCategory(c); setCategoryName(c.name); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ name: "", active: true }); setOpen(true); };
+  const openEdit = (c: Category) => { setEditing(c); setForm({ name: c.name, active: c.active }); setOpen(true); };
 
   const save = () => {
-    if (!categoryName.trim()) return;
-    if (editingCategory) {
-      setCategories((prev) => prev.map((c) => (c.id === editingCategory.id ? { ...c, name: categoryName } : c)));
+    if (!form.name) { toast.error("Name required"); return; }
+    if (editing) {
+      setCategories((p) => p.map((c) => c.id === editing.id ? { ...c, ...form } : c));
       toast.success("Category updated");
     } else {
-      setCategories((prev) => [...prev, { id: Date.now().toString(), name: categoryName, active: true, dishCount: 0 }]);
+      setCategories((p) => [...p, { id: Date.now().toString(), ...form, totalItems: 0 }]);
       toast.success("Category added");
     }
-    setDialogOpen(false);
+    setOpen(false);
   };
 
-  const toggleActive = (id: string) => {
-    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c)));
-    toast.success("Category status updated");
-  };
-
-  const deleteCategory = (id: string) => {
-    setCategories((prev) => prev.filter((c) => c.id !== id));
-    toast.success("Category deleted");
-  };
+  const remove = (id: string) => { setCategories((p) => p.filter((c) => c.id !== id)); toast.success("Deleted"); };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Categories" description="Manage food categories" actions={
-        <Button size="sm" onClick={openAdd}><Plus className="h-4 w-4 mr-1" /> Add Category</Button>
-      } />
+      <PageHeader title="Categories" description="Manage food categories" actions={<Button onClick={openAdd}><Plus className="h-4 w-4 mr-1" />Add Category</Button>} />
 
       <DataTableShell title="All Categories">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {["Name", "Dishes", "Status", "Actions"].map((h) => (
+              {["Image", "Name", "Total Items", "Status", "Actions"].map((h) => (
                 <th key={h} className="text-left px-5 py-3 text-muted-foreground font-medium">{h}</th>
               ))}
             </tr>
@@ -71,15 +62,15 @@ export default function CategoriesPage() {
           <tbody>
             {categories.map((c) => (
               <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                <td className="px-5 py-3"><div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center"><Image className="h-4 w-4 text-muted-foreground" /></div></td>
                 <td className="px-5 py-3 font-medium text-foreground">{c.name}</td>
-                <td className="px-5 py-3 text-muted-foreground">{c.dishCount}</td>
+                <td className="px-5 py-3 text-muted-foreground">{c.totalItems}</td>
                 <td className="px-5 py-3"><StatusBadge status={c.active ? "Active" : "Inactive"} variant={c.active ? "success" : "muted"} /></td>
-                <td className="px-5 py-3 flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(c.id)}>
-                    <StatusBadge status={c.active ? "Off" : "On"} variant={c.active ? "muted" : "success"} />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteCategory(c.id)}><Trash2 className="h-4 w-4" /></Button>
+                <td className="px-5 py-3">
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove(c.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -87,16 +78,20 @@ export default function CategoriesPage() {
         </table>
       </DataTableShell>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editingCategory ? "Edit Category" : "Add Category"}</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Category Name</Label>
-              <Input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} placeholder="e.g., Biryani" />
+          <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Category</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
+              <p className="text-xs text-muted-foreground">Upload Category Image</p>
             </div>
-            <Button onClick={save} className="w-full">{editingCategory ? "Update" : "Add"}</Button>
+            <Input placeholder="Category Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Active</span>
+              <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+            </div>
           </div>
+          <DialogFooter><Button onClick={save}>Save</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
