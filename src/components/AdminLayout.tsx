@@ -14,29 +14,104 @@ import {
   Bell,
   Search,
   Menu,
+  Image,
+  Megaphone,
+  Tag,
+  ShieldCheck,
+  Activity,
+  ChevronDown,
+  UtensilsCrossed,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
-  { label: "Vendors", icon: Store, path: "/admin/vendors" },
-  { label: "Users", icon: Users, path: "/admin/users" },
-  { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
-  { label: "Payments", icon: CreditCard, path: "/admin/payments" },
-  { label: "Categories", icon: FolderTree, path: "/admin/categories" },
-  { label: "Reports", icon: BarChart3, path: "/admin/reports" },
-  { label: "Spin & Win", icon: Disc3, path: "/admin/spin-control" },
-  { label: "Settings", icon: Settings, path: "/admin/settings" },
+interface NavSection {
+  label: string;
+  items: { label: string; icon: React.ElementType; path: string }[];
+}
+
+const navSections: NavSection[] = [
+  {
+    label: "",
+    items: [{ label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" }],
+  },
+  {
+    label: "User Management",
+    items: [{ label: "Users", icon: Users, path: "/admin/users" }],
+  },
+  {
+    label: "Vendor Management",
+    items: [
+      { label: "Vendors", icon: Store, path: "/admin/vendors" },
+      { label: "Vendor Menu", icon: UtensilsCrossed, path: "/admin/vendor-menu" },
+    ],
+  },
+  {
+    label: "Order Management",
+    items: [
+      { label: "Orders", icon: ShoppingCart, path: "/admin/orders" },
+      { label: "Payments", icon: CreditCard, path: "/admin/payments" },
+    ],
+  },
+  {
+    label: "Content Management",
+    items: [
+      { label: "Banners", icon: Image, path: "/admin/banners" },
+      { label: "Announcements", icon: Megaphone, path: "/admin/announcements" },
+    ],
+  },
+  {
+    label: "Food Management",
+    items: [
+      { label: "Categories", icon: FolderTree, path: "/admin/categories" },
+      { label: "Subcategories", icon: Layers, path: "/admin/subcategories" },
+    ],
+  },
+  {
+    label: "Platform Features",
+    items: [
+      { label: "Spin & Win", icon: Disc3, path: "/admin/spin" },
+      { label: "Coupons", icon: Tag, path: "/admin/coupons" },
+    ],
+  },
+  {
+    label: "Analytics",
+    items: [{ label: "Reports", icon: BarChart3, path: "/admin/reports" }],
+  },
+  {
+    label: "Admin Control",
+    items: [
+      { label: "Admin Management", icon: ShieldCheck, path: "/admin/admins" },
+      { label: "Activity Logs", icon: Activity, path: "/admin/activity" },
+    ],
+  },
+  {
+    label: "System",
+    items: [{ label: "Platform Settings", icon: Settings, path: "/admin/settings" }],
+  },
 ];
 
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const location = useLocation();
+
+  const toggleSection = (label: string) => {
+    setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const isSectionActive = (section: NavSection) =>
+    section.items.some((item) => location.pathname === item.path);
+
+  const isSectionOpen = (section: NavSection) => {
+    if (!section.label) return true;
+    if (openSections[section.label] !== undefined) return openSections[section.label];
+    return isSectionActive(section);
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-foreground/50 z-40 lg:hidden"
@@ -44,7 +119,6 @@ export default function AdminLayout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed top-0 left-0 z-50 h-screen bg-sidebar text-sidebar-foreground flex flex-col transition-all duration-200",
@@ -52,8 +126,7 @@ export default function AdminLayout() {
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo */}
-        <div className="h-14 flex items-center px-4 border-b border-sidebar-border">
+        <div className="h-14 flex items-center px-4 border-b border-sidebar-border shrink-0">
           {!collapsed && (
             <span className="text-lg font-bold text-sidebar-primary-foreground tracking-tight truncate">
               Bhojwala
@@ -64,33 +137,53 @@ export default function AdminLayout() {
           )}
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto scrollbar-thin">
-          {navItems.map((item) => {
-            const active = location.pathname === item.path;
+        <nav className="flex-1 py-3 px-2 space-y-1 overflow-y-auto scrollbar-thin">
+          {navSections.map((section) => {
+            const open = isSectionOpen(section);
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  active
-                    ? "bg-sidebar-accent text-sidebar-primary"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              <div key={section.label || "top"}>
+                {section.label && !collapsed && (
+                  <button
+                    onClick={() => toggleSection(section.label)}
+                    className="flex items-center justify-between w-full px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
+                  >
+                    <span>{section.label}</span>
+                    <ChevronDown
+                      className={cn(
+                        "h-3 w-3 transition-transform",
+                        !open && "-rotate-90"
+                      )}
+                    />
+                  </button>
                 )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="truncate">{item.label}</span>}
-              </Link>
+                {(open || collapsed) &&
+                  section.items.map((item) => {
+                    const active = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-primary"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span className="truncate">{item.label}</span>}
+                      </Link>
+                    );
+                  })}
+              </div>
             );
           })}
         </nav>
 
-        {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex h-10 items-center justify-center border-t border-sidebar-border text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors"
+          className="hidden lg:flex h-10 items-center justify-center border-t border-sidebar-border text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors shrink-0"
         >
           <ChevronLeft
             className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")}
@@ -98,14 +191,12 @@ export default function AdminLayout() {
         </button>
       </aside>
 
-      {/* Main */}
       <div
         className={cn(
           "flex-1 flex flex-col transition-all duration-200",
           collapsed ? "lg:ml-16" : "lg:ml-60"
         )}
       >
-        {/* Top navbar */}
         <header className="h-14 bg-card border-b border-border flex items-center px-4 gap-3 sticky top-0 z-30">
           <button
             className="lg:hidden text-muted-foreground hover:text-foreground"
@@ -137,7 +228,6 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 p-4 md:p-6">
           <Outlet />
         </main>
