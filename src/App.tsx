@@ -37,6 +37,14 @@ import CartPage from "@/pages/customer/CartPage";
 import CheckoutPage from "@/pages/customer/CheckoutPage";
 import OrderSuccessPage from "@/pages/customer/OrderSuccessPage";
 import NotFound from "./pages/NotFound";
+import { DeliveryProvider } from "@/contexts/DeliveryContext";
+import DeliveryLayout from "@/components/delivery/DeliveryLayout";
+import DeliveryDashboardPage from "@/pages/delivery/DeliveryDashboardPage";
+import AvailableOrdersPage from "@/pages/delivery/AvailableOrdersPage";
+import ActiveDeliveryPage from "@/pages/delivery/ActiveDeliveryPage";
+import DeliveryEarningsPage from "@/pages/delivery/DeliveryEarningsPage";
+import DeliveryHistoryPage from "@/pages/delivery/DeliveryHistoryPage";
+import DeliveryProfilePage from "@/pages/delivery/DeliveryProfilePage";
 
 const queryClient = new QueryClient();
 
