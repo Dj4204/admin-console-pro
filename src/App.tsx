@@ -98,9 +98,20 @@ const App = () => (
               <Route path="payouts" element={<VendorPayouts />} />
               <Route path="settings" element={<VendorSettings />} />
             </Route>
+            {/* Delivery Partner routes */}
+            <Route path="/delivery" element={<DeliveryLayout />}>
+              <Route index element={<Navigate to="/delivery/dashboard" replace />} />
+              <Route path="dashboard" element={<DeliveryDashboardPage />} />
+              <Route path="available" element={<AvailableOrdersPage />} />
+              <Route path="active" element={<ActiveDeliveryPage />} />
+              <Route path="earnings" element={<DeliveryEarningsPage />} />
+              <Route path="history" element={<DeliveryHistoryPage />} />
+              <Route path="profile" element={<DeliveryProfilePage />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </DeliveryProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
